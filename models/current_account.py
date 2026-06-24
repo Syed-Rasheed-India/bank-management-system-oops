@@ -3,7 +3,7 @@ from datetime import date
 from models.account import Account
 
 
-class Current (Account):
+class CurrentAccount (Account):
     def __init__(self, accountHolderName, phoneNumber, address):
         self.accountNumber = Account.generateAccountNumber(self)
         self.accountHolderName = accountHolderName

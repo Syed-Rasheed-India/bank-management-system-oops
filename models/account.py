@@ -8,9 +8,9 @@ class Account:
     accountType = None
     createdDate = None
     
-
-    def generateAccountNumber(self):
-        self.accountNumber += 1
-        return self.accountNumber
     
+    def generateAccountNumber(self):
+        Account.accountNumber += 1
+        return Account.accountNumber
+
     
