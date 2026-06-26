@@ -1,11 +1,14 @@
 
+from models import account
 from models.saving_account import SavingAccount
 from models.current_account import CurrentAccount
+from datetime import date, datetime
 class BankService:
     
     services ={1: "Create Saving Account", 2: "Create Current Account", 3: "Withdraw Money", 4: "Deposit Money", 5: "Transaction History", 6: "Exit"}
     __saving_account_holders = []
     __current_account_holders = []
+    history={}
     
     def isAccountExists(self,accountNumber,accountHolderName,accountType):
         if accountType.lower() == "saving":
@@ -29,7 +32,37 @@ class BankService:
         if account and amount:
             account.balance += amount
             print(f"Deposited {amount} successfully. Your Account Number is {account.accountNumber}. New balance is {account.balance}")
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+            transaction = {
+                    "time": timestamp,
+                    "type": "deposit",
+                    "amount": amount
+                }   
+
+            account.transactionHistory.append(transaction)
             return True
+        
+        elif account == None and amount == None:
+
+            accountNumber = int(input("Enter account number: ")) 
+            accountHolderName = input("Enter account holder name: ")
+            accountType = input("Enter account type (Saving/Current): ")
+
+            if self.isAccountExists(accountNumber, accountHolderName, accountType):
+                amount = int(input("Enter amount to deposit: "))
+                if accountType.lower() == "saving":
+                    for account in self.__saving_account_holders:
+                        if account.accountNumber == accountNumber and account.accountHolderName == accountHolderName:
+                            self.deposit_money(account, amount)
+
+                elif accountType.lower() == "current":
+                    for account in self.__current_account_holders:
+                        if account.accountNumber == accountNumber and account.accountHolderName == accountHolderName:
+                            self.deposit_money(account, amount)
+            else:
+                print("Account does not exist.")
+
         return False
 
     def create_saving_account(self):
@@ -50,7 +83,9 @@ class BankService:
                     print("Account creation failed!")
             else:
                 print(f"Amount should be greater than minimum balance of {saving_account.minimumBalance}")
+
     def create_current_account(self):
+
         accountHolderName, phoneNumber, address = self.getDetils()
         
         current_account = CurrentAccount(accountHolderName, phoneNumber, address)
@@ -69,6 +104,7 @@ class BankService:
                 print(f"Amount should be greater than minimum balance of {current_account.minimumBalance}") 
 
     def withdraw_money(self):
+
         accountNumber = int(input("Enter account number: ")) 
         accountHolderName = input("Enter account holder name: ")
         accountType = input("Enter account type (Saving/Current): ")
@@ -80,6 +116,15 @@ class BankService:
                     if account.accountNumber == accountNumber and account.accountHolderName == accountHolderName:
                         if account.balance - amount >= account.minimumBalance:
                             account.balance -= amount
+                            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+                            transaction = {
+                                "time": timestamp,
+                                "type": "withdraw",
+                                "amount": amount
+                            }
+
+                            account.transactionHistory.append(transaction)
                             print(f"Withdrawn {amount} successfully. New balance is {account.balance}")
                         else:
                             print(f"Insufficient balance. Minimum balance of {account.minimumBalance} is required.")
@@ -88,11 +133,46 @@ class BankService:
                     if account.accountNumber == accountNumber and account.accountHolderName == accountHolderName:
                         if account.balance - amount >= account.minimumBalance:
                             account.balance -= amount
+                            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+                            transaction = {
+                                "time": timestamp,
+                                "type": "withdraw",
+                                "amount": amount
+                            }
+
+                            account.transactionHistory.append(transaction)
+                            # account.transactionHistory.append(self.history)
                             print(f"Withdrawn {amount} successfully. New balance is {account.balance}")
                         else:
                             print(f"Insufficient balance. Minimum balance of {account.minimumBalance} is required.")
         else:
             print("Account does not exist.")
+
+    def transaction_history(self):
+        accountNumber = int(input("Enter account number: ")) 
+        accountHolderName = input("Enter account holder name: ")
+        accountType = input("Enter account type (Saving/Current): ")
+
+        if self.isAccountExists(accountNumber, accountHolderName, accountType):
+            if accountType.lower() == "saving":
+                for account in self.__saving_account_holders:
+                    if account.accountNumber == accountNumber and account.accountHolderName == accountHolderName:
+                        print(f"Transaction history for {account.accountHolderName}:")
+                        for data in account.transactionHistory:
+                            for date, transaction in data.items():
+                                print(f"{date}: {transaction}")
+                        
+            elif accountType.lower() == "current":
+                for account in self.__current_account_holders:
+                    if account.accountNumber == accountNumber and account.accountHolderName == accountHolderName:
+                        print(f"Transaction history for {account.accountHolderName}:")
+                        for data in account.transactionHistory:
+                            for date, transaction in data.items():
+                                print(f"{date}: {transaction}")
+        else:
+            print("Account does not exist.")
+    
     def start(self):
         
         while True:

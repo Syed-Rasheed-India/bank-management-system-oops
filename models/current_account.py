@@ -12,5 +12,6 @@ class CurrentAccount (Account):
         self.accountType = "Current"
         self.createdDate = date.today()
         self.minimumBalance =1000
+        
 
 

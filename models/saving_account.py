@@ -12,5 +12,5 @@ class SavingAccount(Account):
         self.createdDate = date.today()
         self.interestRate = 0.04
         self.minimumBalance = 500
-    
+        self.transactionHistory=[]
     
